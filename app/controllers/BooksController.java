@@ -2,20 +2,26 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import models.Book;
+import play.db.jpa.JPAApi;
+import play.db.jpa.Transactional;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import javax.inject.Inject;
+import javax.persistence.TypedQuery;
+import java.util.List;
 
 public class BooksController extends Controller {
 
-    private Map<Integer, Book> books = new HashMap<>();
+    private JPAApi jpaApi;
 
-    private Integer index = 0;
+    @Inject
+    public BooksController(JPAApi jpaApi) {
+        this.jpaApi = jpaApi;
+    }
 
+    @Transactional
     public Result createBook() {
 
         final JsonNode jsonNode = request().body().asJson();
@@ -25,19 +31,19 @@ public class BooksController extends Controller {
             return badRequest("Missing title");
         }
 
-        final Integer index = this.index++;
+        final Book book = new Book();
+        book.setTile(title);
 
-        final Book book = new Book(index, title);
+        jpaApi.em().persist(book);
 
-        books.put(index, book);
-
-        return created(index.toString());
+        return created(book.getId().toString());
 
     }
 
+    @Transactional
     public Result getBookById(Integer id) {
 
-        final Book book = books.get(id);
+        final Book book = jpaApi.em().find(Book.class, id);
         if (null == book) {
             return notFound("Did not find book with id " + id);
         }
@@ -48,6 +54,7 @@ public class BooksController extends Controller {
 
     }
 
+    @Transactional
     public Result updateBookById(Integer id) {
 
         final JsonNode jsonNode = request().body().asJson();
@@ -57,14 +64,14 @@ public class BooksController extends Controller {
             return badRequest("Missing title");
         }
 
-        final Book book = books.get(id);
+        final Book book = jpaApi.em().find(Book.class, id);
         if (null == book) {
             return notFound("Did not find book with id " + id);
         }
 
         book.setTile(newTitle);
 
-        books.put(id, book);
+        jpaApi.em().persist(book);
 
         final JsonNode bookJson = Json.toJson(book);
 
@@ -72,20 +79,25 @@ public class BooksController extends Controller {
 
     }
 
+    @Transactional
     public Result deleteBookById(Integer id) {
 
-        final Book deletedBook = books.remove(id);
-        if (null == deletedBook) {
+        final Book book = jpaApi.em().find(Book.class, id);
+        if (null == book) {
             return notFound("Did not find book with id " + id);
         }
+
+        jpaApi.em().remove(book);
 
         return noContent();
 
     }
 
+    @Transactional
     public Result getAllBooks() {
 
-        final Collection<Book> books = this.books.values();
+        TypedQuery<Book> query = jpaApi.em().createQuery("SELECT b FROM Book b", Book.class);
+        List<Book> books = query.getResultList();
 
         final JsonNode jsonNode = Json.toJson(books);
 
