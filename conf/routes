@@ -15,6 +15,17 @@ POST /greetings                     controllers.HelloWorldController.greetings()
 GET /me                             controllers.HelloWorldController.me()
 
 
+# Book controller
+
+GET /books                          controllers.BooksController.getAllBooks()
+
+POST /books                         controllers.BooksController.createBook()
+
+GET /books/:id                      controllers.BooksController.getBookById(id: Integer)
+
+DELETE /books/:id                   controllers.BooksController.deleteBookById(id: Integer)
+
+PUT /books/:id                      controllers.BooksController.updateBookById(id: Integer)
 
 
 

@@ -76,9 +76,9 @@ public class HelloWorldController extends Controller {
 
     static class Person {
 
-        String firstName;
+        private String firstName;
 
-        String lastName;
+        private String lastName;
 
         @JsonProperty("first_name")
         public String getFirstName() {
