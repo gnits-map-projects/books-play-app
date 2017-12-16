@@ -75,7 +75,7 @@ public class BooksController extends Controller {
     @Transactional
     public Result deleteBookById(Integer id) {
 
-        final Book book = bookDao.deleteBook(id);
+        final Book book = bookDao.deleteById(id);
         if (null == book) {
             return notFound();
         }
