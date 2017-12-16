@@ -1,24 +1,23 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import daos.BookDao;
 import models.Book;
-import play.db.jpa.JPAApi;
 import play.db.jpa.Transactional;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 
 import javax.inject.Inject;
-import javax.persistence.TypedQuery;
 import java.util.List;
 
 public class BooksController extends Controller {
 
-    private JPAApi jpaApi;
+    private BookDao bookDao;
 
     @Inject
-    public BooksController(JPAApi jpaApi) {
-        this.jpaApi = jpaApi;
+    public BooksController(BookDao bookDao) {
+        this.bookDao = bookDao;
     }
 
     @Transactional
@@ -31,19 +30,22 @@ public class BooksController extends Controller {
             return badRequest("Missing title");
         }
 
-        final Book book = new Book();
+        Book book = new Book();
         book.setTile(title);
 
-        jpaApi.em().persist(book);
+        book = bookDao.persist(book);
 
         return created(book.getId().toString());
-
     }
 
     @Transactional
     public Result getBookById(Integer id) {
 
-        final Book book = jpaApi.em().find(Book.class, id);
+        if (null == id) {
+            return badRequest();
+        }
+
+        final Book book = bookDao.findById(id);
         if (null == book) {
             return notFound("Did not find book with id " + id);
         }
@@ -59,35 +61,24 @@ public class BooksController extends Controller {
 
         final JsonNode jsonNode = request().body().asJson();
         final String newTitle = jsonNode.get("title").asText();
-
         if (null == newTitle) {
             return badRequest("Missing title");
         }
 
-        final Book book = jpaApi.em().find(Book.class, id);
-        if (null == book) {
-            return notFound("Did not find book with id " + id);
-        }
-
-        book.setTile(newTitle);
-
-        jpaApi.em().persist(book);
+        Book book = new Book(id, newTitle);
+        book = bookDao.update(book);
 
         final JsonNode bookJson = Json.toJson(book);
-
         return ok(bookJson);
-
     }
 
     @Transactional
     public Result deleteBookById(Integer id) {
 
-        final Book book = jpaApi.em().find(Book.class, id);
+        final Book book = bookDao.deleteBook(id);
         if (null == book) {
-            return notFound("Did not find book with id " + id);
+            return notFound();
         }
-
-        jpaApi.em().remove(book);
 
         return noContent();
 
@@ -96,8 +87,7 @@ public class BooksController extends Controller {
     @Transactional
     public Result getAllBooks() {
 
-        TypedQuery<Book> query = jpaApi.em().createQuery("SELECT b FROM Book b", Book.class);
-        List<Book> books = query.getResultList();
+        final List<Book> books = bookDao.findAll();
 
         final JsonNode jsonNode = Json.toJson(books);
 
