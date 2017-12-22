@@ -27,6 +27,9 @@ DELETE /books/:id                   controllers.BooksController.deleteBookById(i
 
 PUT /books/:id                      controllers.BooksController.updateBookById(id: Integer)
 
+# Locations
+
+GET /locations                      controllers.MapController.locations()
 
 
 
