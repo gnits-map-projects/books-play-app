@@ -9,7 +9,8 @@ scalaVersion := "2.12.2"
 libraryDependencies += guice
 
 // Test Database
-libraryDependencies += "com.h2database" % "h2" % "1.4.194"
+//libraryDependencies += "com.h2database" % "h2" % "1.4.194"
+libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.36"
 
 libraryDependencies ++= Seq(javaJpa, "org.hibernate" % "hibernate-entitymanager" % "5.1.0.Final")
 
