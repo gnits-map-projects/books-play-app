@@ -24,7 +24,55 @@ public class UserController extends Controller {
     }
 
     public Result signUp() {
-        return TODO;
+
+        LOGGER.debug("Sign up");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final String username = jsonNode.get("username").asText();
+        final String password = jsonNode.get("password").asText();
+        final String email = jsonNode.get("email").asText();
+
+        if (null == username || null == password || null == email) {
+            return badRequest();
+        }
+
+        // Username must not be taken
+        final User existingUser = userDao.findByUsername(username);
+        if (null != existingUser) {
+            return status(409, "Username already taken");
+        }
+
+        // Generate salt
+        final String salt = generateSalt();
+
+        // Hash password
+        final String hashedPassword = hashPassword(password, salt, 1000);
+
+        // Create User
+        final User user = new User(username, hashedPassword, User.Role.User, salt, 1000);
+        userDao.persist(user);
+
+        return created();
+    }
+
+    private static String generateSalt() {
+
+        // TODO Generate Salt
+
+        return "YOU_CAN_DO_BETTER";
+    }
+
+    private static String hashPassword(String password, String salt, int iteratation) {
+
+        while (iteratation > 0) {
+
+            // TODO Hash
+
+            iteratation--;
+        }
+
+
+        return "FIX_ME";
     }
 
     public Result signIn() {
@@ -40,18 +88,22 @@ public class UserController extends Controller {
         }
 
         // Read User from database using "username"
-        final User user = userDao.findbyUsername(username);
+
+        final User user = userDao.findByUsername(username);
         if (null == user) {
             return unauthorized();
         }
 
+        // Hash password
+        final String hashedPassword = hashPassword(password, user.getSalt(), user.getIterations());
+
         // Compare passwords
-        if (!password.equals(user.getPassword())) {
+        if (!hashedPassword.equals(user.getPasswordHash())) {
             return unauthorized();
         }
 
         // General random access token
-        final String accessToken = "abc123";
+        final String accessToken = generateAccessToken();
 
         // Store in database
         user.setAccessToken(accessToken);
@@ -62,6 +114,13 @@ public class UserController extends Controller {
         result.put("access_token", accessToken);
 
         return ok(result);
+    }
+
+    private static String generateAccessToken() {
+
+        // TODO
+
+        return "ACCESS_TOKEN";
     }
 
     public Result signOut() {

@@ -1,11 +1,10 @@
 package daos;
 
-import daos.CrudDao;
 import models.User;
 
 public class UserDao implements CrudDao<Integer, User> {
 
-    private User user = new User("Mattias", "password", User.Role.Admin);
+    private User user = new User("Mattias", "PASSWORD_HASH", User.Role.Admin,"SALT", 1000);
 
     @Override
     public User persist(User entity) {
@@ -30,7 +29,7 @@ public class UserDao implements CrudDao<Integer, User> {
         return null;
     }
 
-    public User findbyUsername(String username) {
+    public User findByUsername(String username) {
 
         final User user = this.user;
 
@@ -46,7 +45,7 @@ public class UserDao implements CrudDao<Integer, User> {
 
 
     private User fakeUser() {
-        return new User("Mattias", "password", User.Role.User);
+        return new User("Mattias", "PASSWORD_HASH", User.Role.Admin, "SALT", 1000);
     }
 
 }

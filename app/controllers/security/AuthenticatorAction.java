@@ -4,10 +4,12 @@ import com.google.inject.Inject;
 import daos.UserDao;
 import models.User;
 import play.Logger;
+import play.db.jpa.JPAApi;
 import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;
 
+import javax.persistence.EntityManager;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -17,10 +19,12 @@ public class AuthenticatorAction extends Action.Simple {
     private final static Logger.ALogger LOGGER = Logger.of(AuthenticatorAction.class);
 
     private UserDao userDao;
+    private JPAApi jpaApi;
 
     @Inject
-    public AuthenticatorAction(UserDao userDao) {
+    public AuthenticatorAction(UserDao userDao, JPAApi jpaApi) {
         this.userDao = userDao;
+        this.jpaApi = jpaApi;
     }
 
     @Override
@@ -46,8 +50,15 @@ public class AuthenticatorAction extends Action.Simple {
         }
         LOGGER.debug("Access token: {}", accessToken);
 
-        // Get user by access token from database
-        final User user = userDao.findByAccessToken(accessToken);
+        // All database operations must happen within a transaction
+        // Create an explicit transaction
+        // The code inside withTransaction block will be run within a transaction
+        // You can also consider moving this code inside UserDao class
+        final User user = jpaApi.withTransaction(entityManager -> {
+            // Get user by access token from database
+            return userDao.findByAccessToken(accessToken);
+        });
+
         if (null == user) {
             return CompletableFuture.completedFuture(unauthorized());
         }

@@ -13,21 +13,26 @@ public class User {
 
     String username;
 
-    String password;
+    String passwordHash;
+
+    String salt;
+
+    Integer iterations;
 
     Role role;
 
     String accessToken;
 
-    // expiration
+    Long expirationTimestamp;
 
-    // refreshToken
+    String refreshToken;
 
-
-    public User(String username, String password, Role role) {
+    public User(String username, String passwordHash, Role role, String salt, Integer iterations) {
         this.username = username;
-        this.password = password;
+        this.passwordHash = passwordHash;
         this.role = role;
+        this.salt = salt;
+        this.iterations = iterations;
     }
 
     public Integer getId() {
@@ -47,12 +52,12 @@ public class User {
     }
 
     @JsonIgnore
-    public String getPassword() {
-        return password;
+    public String getPasswordHash() {
+        return passwordHash;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
     public Role getRole() {
@@ -70,5 +75,23 @@ public class User {
 
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
+    }
+
+    @JsonIgnore
+    public String getSalt() {
+        return salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
+    }
+
+    @JsonIgnore
+    public Integer getIterations() {
+        return iterations;
+    }
+
+    public void setIterations(Integer iterations) {
+        this.iterations = iterations;
     }
 }
