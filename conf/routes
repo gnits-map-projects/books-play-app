@@ -16,6 +16,8 @@ GET /me                             controllers.HelloWorldController.me()
 
 # User Controller
 
+POST /user/signup                   controllers.UserController.signUp()
+
 POST /users/signin                  controllers.UserController.signIn()
 
 GET /users/me                       controllers.UserController.getCurrentUser()
@@ -35,6 +37,12 @@ PUT /books/:id                      controllers.BooksController.updateBookById(i
 # Locations
 
 GET /locations                      controllers.MapController.locations()
+
+# Image controller
+
+POST /images                        controllers.ImageController.uploadImage()
+GET /images/:id                     controllers.ImageController.downloadImage(id: String)
+DELETE /images/:id                  controllers.ImageController.deleteImage(id: String)
 
 
 

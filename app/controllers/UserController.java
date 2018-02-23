@@ -88,7 +88,6 @@ public class UserController extends Controller {
         }
 
         // Read User from database using "username"
-
         final User user = userDao.findByUsername(username);
         if (null == user) {
             return unauthorized();
